@@ -37,6 +37,25 @@ const DEV_CONF: ConfigEnvironment = {
         fqdn: process.env.PBX_FQDN,
         recordingPath: process.env.PBX_RECORDING_PATH,
     },
+    voip: {
+        asterisk: {
+            ari: [
+                {
+                    providerName: process.env.ASTERISK_ARI_CALL_PROVIDER_NAME,
+                    host: process.env.ASTERISK_ARI_HOST,
+                    port: parseInt(process.env.ASTERISK_ARI_PORT),
+                    stasis: process.env.ASTERISK_ARI_CALL_USER,
+                    user: process.env.ASTERISK_ARI_CALL_USER,
+                    password: process.env.ASTERISK_ARI_CALL_PASSWORD,
+                },
+            ],
+            pbx3cx: {
+                trunkId: process.env.ASTERISK_PBX3CX_TRUNK_ID,
+                outgoingContext: process.env.ASTERISK_PBX3CX_OUTGOING_CONTEXT,
+                timeout: parseInt(process.env.ASTERISK_PBX3CX_OUTGOING_TIMEOUT),
+            },
+        },
+    },
 };
 
 const PROD_CONF: ConfigEnvironment = {
@@ -55,12 +74,31 @@ const PROD_CONF: ConfigEnvironment = {
         formatDate: 'YYYY-MM-DD',
         mixSize: '20m',
         maxFiles: '14d',
-        level: [LogLevel.info],
+        level: [LogLevel.info, LogLevel.error],
     },
     pacHost: process.env.PAC_HOST,
     pbx: {
         extensionLength: parseInt(process.env.PBX_EXTENSION_LENGTH),
         fqdn: process.env.PBX_FQDN,
         recordingPath: process.env.PBX_RECORDING_PATH,
+    },
+    voip: {
+        asterisk: {
+            ari: [
+                {
+                    providerName: process.env.ASTERISK_ARI_CALL_PROVIDER_NAME,
+                    host: process.env.ASTERISK_ARI_HOST,
+                    port: parseInt(process.env.ASTERISK_ARI_PORT),
+                    stasis: process.env.ASTERISK_ARI_CALL_USER,
+                    user: process.env.ASTERISK_ARI_CALL_USER,
+                    password: process.env.ASTERISK_ARI_CALL_PASSWORD,
+                },
+            ],
+            pbx3cx: {
+                trunkId: process.env.ASTERISK_PBX3CX_TRUNK_ID,
+                outgoingContext: process.env.ASTERISK_PBX3CX_OUTGOING_CONTEXT,
+                timeout: parseInt(process.env.ASTERISK_PBX3CX_OUTGOING_TIMEOUT),
+            },
+        },
     },
 };

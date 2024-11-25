@@ -65,3 +65,5 @@ sql.ts
 *pem
 *crt
 public
+/prisma/generated
+/prisma/cdr.db

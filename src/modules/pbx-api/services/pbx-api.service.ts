@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CdrData, LastCallId } from '../interfaces/pbx-api.interface';
-import { PbxCdrService } from '@app/modules/pbx-cdr/services/pbc-cdr.service';
+import { PbxCdrService } from '@app/modules/pbx-cdr/services/pbx-cdr.service';
 import MakeCallDto from '../dto/make-call.dto';
-import { PacCallService } from '@app/modules/pac-connector/modules/pac-call/services/pac-call.service';
+import { AstersikService } from '@app/modules/asterisk/services/asterisk.service';
 
 @Injectable()
 export class PbxApiService {
     constructor(
         private readonly pbxCdrService: PbxCdrService,
-        private readonly pacCallService: PacCallService,
+        @Inject('Asterisk') private readonly voipPbxService: AstersikService,
     ) {}
 
     public async getLastPbxCdrCallId(): Promise<LastCallId> {
@@ -24,7 +24,7 @@ export class PbxApiService {
 
         const formatCdr: CdrData[] = [];
 
-        const sortedCdrs = [...cdrs].sort((a, b) => a.segment_id - b.segment_id);
+        const sortedCdrs = [...cdrs].sort((a, b) => a.segment_id + b.segment_id);
 
         for (const cdr of sortedCdrs) {
             formatCdr.push({
@@ -43,7 +43,7 @@ export class PbxApiService {
     }
 
     public async makePbxCall(callData: MakeCallDto): Promise<void> {
-        await this.pacCallService.makeCall({
+        await this.voipPbxService.originateCall({
             to: String(callData.source_caller_id),
             from: String(callData.caller_id),
         });

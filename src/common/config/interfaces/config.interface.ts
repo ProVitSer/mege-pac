@@ -7,6 +7,7 @@ export interface ConfigEnvironment {
     log: LogEnvironmentVariables;
     pacHost: string;
     pbx: PbxEnvironmentVariables;
+    voip: VoipEnvironmentVariables;
 }
 
 export interface CorsEnvironmentVariables {
@@ -29,4 +30,26 @@ export interface PbxEnvironmentVariables {
     extensionLength: number;
     fqdn: string;
     recordingPath: string;
+}
+
+export interface VoipEnvironmentVariables {
+    asterisk: AsteriskEnvironmentVariables;
+}
+
+export interface AsteriskEnvironmentVariables {
+    ari: AsteriskAriEnvironmentVariables[];
+    pbx3cx: {
+        trunkId: string;
+        outgoingContext: string;
+        timeout: number;
+    };
+}
+
+export interface AsteriskAriEnvironmentVariables {
+    providerName: string;
+    host: string;
+    port: number;
+    stasis: string;
+    user: string;
+    password: string;
 }

@@ -12,6 +12,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { PbxCdrModule } from '../pbx-cdr/pbx-cdr.module';
 import { PacConnectorModule } from '../pac-connector/pac-connector.module';
 import { PbxApiModule } from '../pbx-api/pbx-api.module';
+import { AsteriskModule } from '../asterisk/asterisk.module';
 
 @Module({
     imports: [
@@ -31,6 +32,7 @@ import { PbxApiModule } from '../pbx-api/pbx-api.module';
         PbxCdrModule,
         PacConnectorModule,
         PbxApiModule,
+        AsteriskModule,
         RouterModule.register([
             {
                 path: '',
