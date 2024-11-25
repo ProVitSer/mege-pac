@@ -6,8 +6,8 @@ export class MakeCallDto {
     @IsNotEmpty()
     @ApiProperty({
         type: Number,
-        description: 'Внутренний номер абонента',
-        example: '102',
+        description: 'Внешние номер абонента',
+        example: '79102223311',
     })
     source_caller_id: number;
 
@@ -15,8 +15,8 @@ export class MakeCallDto {
     @IsNotEmpty()
     @ApiProperty({
         type: Number,
-        description: 'Внешние номер абонента',
-        example: '79102223311',
+        description: 'Внутренний номер абонента',
+        example: '102',
     })
     caller_id: number;
 }

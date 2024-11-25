@@ -46,7 +46,7 @@ export class SyncPbxCdrSchedule {
         try {
             await this.prismaPbxCdr.pbxCdr.upsert({
                 where: {
-                    segment_id: data.segmentId, // Уникальное поле, по которому будет проверяться существование записи
+                    segment_id: data.segmentId,
                 },
                 create: {
                     call_id: data.callId,

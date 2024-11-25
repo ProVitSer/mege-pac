@@ -11,7 +11,6 @@ export class PacSqlService {
     constructor(private readonly pgcs: PacGrpcConnectorService) {}
 
     public async sqlRequest(data: SqlRequest) {
-        console.log(data);
         return await this.grpcSend<SqlRequest, SqlResponse>(data);
     }
 
