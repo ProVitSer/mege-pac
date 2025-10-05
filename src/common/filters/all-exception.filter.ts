@@ -1,6 +1,7 @@
 import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { AppLoggerService } from '../logger/logger.service';
+import { UtilsService } from '@app/common/utils';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -21,11 +22,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const message = exception instanceof HttpException ? exception.getResponse() : exception;
 
         this.logger.error(
-            {
+            UtilsService.dataToString({
                 timestamp: new Date().toISOString(),
                 path: request.url,
                 error: message,
-            },
+            })
+           ,
             AllExceptionsFilter.name,
         );
 

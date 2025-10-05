@@ -1,15 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class GetCdrDto {
-    @IsNumber()
     @IsNotEmpty()
+    @IsString()
     @ApiProperty({
-        type: Number,
         description: 'Id вызова',
-        example: '9988',
+        example: '00000000-01dc-3537-2a4e-650f00003d88',
     })
-    call_id: number;
+    call_id: string;
 }
 
 export default GetCdrDto;

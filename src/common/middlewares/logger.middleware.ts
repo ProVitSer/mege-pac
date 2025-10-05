@@ -19,8 +19,16 @@ export class LoggerMiddleware implements NestMiddleware {
             this.getError(error);
         });
 
+        const originalSend = response.send;
+        let responseBody: any;
+        response.send = function (body: any) {
+            responseBody = body;
+            response.send = originalSend;
+            return originalSend.call(this, body);
+        };
+
         response.on('finish', () => {
-            this.logMiddleware(request, response, this.requestErrorMessage);
+            this.logMiddleware(request, response, this.requestErrorMessage, responseBody);
         });
 
         next();
@@ -30,30 +38,34 @@ export class LoggerMiddleware implements NestMiddleware {
         this.requestErrorMessage = error.message;
     }
 
-    private logMiddleware(request: Request, response: Response, errorMessage: string) {
-        const { httpVersion, method, socket, url, body } = request;
+    private logMiddleware(request: Request, response: Response, errorMessage: string, responseBody?: any) {
+        const { httpVersion, method, socket, url } = request;
 
         const { remoteFamily } = socket;
 
-        const { statusCode, statusMessage } = response;
+        let parsedResponseBody = responseBody;
+        if (typeof responseBody === 'string') {
+            try {
+                parsedResponseBody = JSON.parse(responseBody);
+            } catch {
+                parsedResponseBody = responseBody;
+            }
+        }
 
-        this.logger.log({
+        const messageString = UtilsService.dataToString({
             timestamp: Date.now(),
             processingTime: Date.now() - this.requestStart,
             body: request.body,
+            responseBody: parsedResponseBody,
+            statusCode: response.statusCode,
             errorMessage,
             httpVersion,
             method,
             remoteAddress: UtilsService.getClientIp(request),
             remoteFamily,
             url,
-            request: {
-                body,
-            },
-            response: {
-                statusCode,
-                statusMessage,
-            },
         });
+
+        this.logger.log(messageString, LoggerMiddleware.name);
     }
 }

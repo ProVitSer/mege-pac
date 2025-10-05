@@ -24,7 +24,7 @@ export class AriService {
 
             return { uniqueid: result.id };
         } catch (e) {
-            this.logger.error(e);
+            this.logger.error(e, AriService.name);
             throw new Error(ARI_ORIGINATE_ERROR);
         }
     }

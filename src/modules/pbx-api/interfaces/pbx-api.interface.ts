@@ -2,11 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class LastCallId {
     @ApiProperty({
-        type: Number,
+        type: String,
         description: 'Последний доступный call_id(id вызова)',
-        example: '9899',
+        example: '00000000-01dc-3537-2a4e-650f00003d88',
     })
-    call_id: number;
+    call_id: string;
 }
 
 export class CdrData {
@@ -15,7 +15,14 @@ export class CdrData {
         description: 'id вызова',
         example: '9899',
     })
-    call_id: number;
+    call_id?: string | null;
+
+    @ApiProperty({
+        type: String,
+        description: 'id вызова',
+        example: '00000000-01dc-3537-2a4e-650f00003d88',
+    })
+    cdr_id?: string | null;
 
     @ApiProperty({
         type: Boolean,
