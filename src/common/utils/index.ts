@@ -20,4 +20,37 @@ export class UtilsService {
     static getClientIp(request: Request): string {
         return this.normalizeIp(requestIp.getClientIp(request));
     }
+
+    static dataToString<T> (data: T): string | undefined | T {
+
+        try {
+
+            if (Array.isArray(data)) {
+
+                return JSON.stringify(data);
+
+            }
+
+            switch (typeof data) {
+
+                case 'string':
+                    return data;
+                case 'number':
+                case 'symbol':
+                case 'bigint':
+                case 'boolean':
+                case 'function':
+                    return data.toString();
+                case 'object':
+                    return JSON.stringify(data);
+                default:
+                    return undefined;
+            }
+
+        } catch (e) {
+
+            return data;
+
+        }
+    }
 }

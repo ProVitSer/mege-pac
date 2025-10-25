@@ -23,9 +23,9 @@ async function bootstrap() {
             ...(httpsOptions ? { httpsOptions } : {}),
         });
 
-        const prismaZetaService = app.get(PrismaService);
+        const prismaMegeService = app.get(PrismaService);
 
-        await prismaZetaService.enableShutdownHooks(app);
+        await prismaMegeService.enableShutdownHooks(app);
 
         app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidUnknownValues: true }));
 
@@ -48,7 +48,7 @@ async function bootstrap() {
         const docConfig = new DocumentBuilder()
             .setTitle('3CX PBX API')
             .addTag('pbx-api', 'Методы получения данных cdr и инициация звонка')
-            .setVersion('1.0.0')
+            .setVersion('1.1.0')
             .build();
 
         const document = SwaggerModule.createDocument(app, docConfig);
@@ -69,7 +69,7 @@ async function bootstrap() {
                 loggerService.error(error, 'Uncaught Exception');
             });
 
-        loggerService.log(`App listen on port: ${appPort}`);
+        loggerService.log(`App listen on port: ${appPort}`, 'Bootstrap');
     } catch (e) {
         console.log(e, 'Error on bootstrap!');
 

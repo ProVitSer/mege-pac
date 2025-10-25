@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration from '@app/common/config/config.provider';
 import { WinstonModule } from 'nest-winston';
@@ -56,8 +56,8 @@ import { AsteriskModule } from '../asterisk/asterisk.module';
     ],
     exports: [AppLoggerService],
 })
-export class AppModule {
+export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer): void {
-        consumer.apply(LoggerMiddleware).forRoutes();
+        consumer.apply(LoggerMiddleware).forRoutes('*');
     }
 }

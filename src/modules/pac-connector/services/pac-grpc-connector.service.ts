@@ -19,7 +19,7 @@ export class PacGrpcConnectorService {
 
             return grpcClient.getService<D>(data.serviceName)[data.methodName](data.data);
         } catch (e) {
-            this.logger.error(e);
+            this.logger.error(e, PacGrpcConnectorService.name);
             throw e;
         }
     }

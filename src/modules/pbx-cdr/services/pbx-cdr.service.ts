@@ -6,21 +6,21 @@ import { PbxCdr } from '../../../../prisma/generated/sqlite';
 export class PbxCdrService {
     constructor(private prismaPbxCdr: PrismaService) {}
 
-    public async getLastCallId(): Promise<number> {
+    public async getLastCallId(): Promise<string> {
         const cdr = await this.prismaPbxCdr.pbxCdr.findFirst({
             orderBy: {
                 id: 'desc',
             },
         });
 
-        return cdr.call_id;
+        return cdr?.call_history_id || '';
     }
 
-    public async getLastCdr(callId: number): Promise<PbxCdr[]> {
-        return await this.prismaPbxCdr.pbxCdr.findMany({
+    public async cdrByCallHistoryId(callHistoryId: string): Promise<PbxCdr[]> {
+        return this.prismaPbxCdr.pbxCdr.findMany({
             where: {
-                call_id: {
-                    gt: callId,
+                call_history_id: {
+                    gt: callHistoryId,
                 },
             },
             orderBy: {

@@ -2,11 +2,11 @@ import { PacSqlService } from '@app/modules/pac-connector/modules/pac-sql/servic
 import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { format, startOfDay, endOfDay } from 'date-fns';
-import { getPbxStatisticsByIdQuery, getPbxStatisticsQuery } from '@app/common/constants/sql';
 import { ConfigService } from '@nestjs/config';
-import { PbxCallStatisticsData, TransformedPbxCallStatisticsData } from '../interfaces/pbx-cdr.interface';
+import { PbxCallStatisticsData } from '../interfaces/pbx-cdr.interface';
 import { PrismaService } from '@app/modules/prisma/prisma.service';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { getPbxStatisticsQuery } from '@app/modules/pbx-cdr/pbx-cdr.utils';
 
 @Injectable()
 export class SyncPbxCdrSchedule {
@@ -30,63 +30,63 @@ export class SyncPbxCdrSchedule {
 
             if (!pbxCallStatistics) return;
 
-            const aggregatedData = this.aggregatePbxCallStatisticsData(JSON.parse(pbxCallStatistics));
-
-            const sortedCalls = [...aggregatedData].sort((a, b) => a.segmentId - b.segmentId);
-
-            for (const call of sortedCalls) {
-                await this.addPbxCallStatistic(call);
-            }
+            const callsData = JSON.parse(pbxCallStatistics);
+            const sortedCallsData = [...callsData].sort((a, b) => {
+                if (a.cdr_id < b.cdr_id) return -1;
+                if (a.cdr_id > b.cdr_id) return 1;
+                return 0;
+            });
+            await this.addPbxCallStatistic(sortedCallsData);
         } catch (e) {
-            this.logger.error(e);
+            this.logger.error(e, SyncPbxCdrSchedule.name);
         }
     }
 
-    private async addPbxCallStatistic(data: TransformedPbxCallStatisticsData) {
+    private async addPbxCallStatistic(sortedCalls: PbxCallStatisticsData[]) {
+        const pbx = this.configService.get('pbx');
+
         try {
-            await this.prismaPbxCdr.pbxCdr.upsert({
-                where: {
-                    segment_id: data.segmentId,
-                },
-                create: {
-                    call_id: data.callId,
-                    answered: data.answered,
-                    destination_caller_id: data.destinationCallerId,
-                    ringing_duration: data.ringingDuration,
-                    source_caller_id: data.sourceCallerId,
-                    start_time: data.startTime,
-                    talking_duration: data.talkingDuration,
-                    recording_url: data.recordingUrl,
-                    segment_id: data.segmentId,
-                },
-                update: {
-                    call_id: data.callId,
-                    answered: data.answered,
-                    destination_caller_id: data.destinationCallerId,
-                    ringing_duration: data.ringingDuration,
-                    source_caller_id: data.sourceCallerId,
-                    start_time: data.startTime,
-                    talking_duration: data.talkingDuration,
-                    recording_url: data.recordingUrl,
-                },
-            });
+            await this.prismaPbxCdr.$transaction(
+                sortedCalls.map((data: PbxCallStatisticsData) => {
+                    const callData = {
+                        call_history_id: data.call_history_id,
+                        answered: Boolean(data.answered),
+                        destination_caller_id: data.destination_caller_id,
+                        ringing_duration: data.ringing_duration,
+                        source_caller_id: data.source_caller_id,
+                        start_time: data.start_time,
+                        talking_duration: data.talking_duration,
+                        recording_url: data.recording_url ? `${pbx.recordingPath}/${data.recording_url}` : null,
+                    };
+
+                    return this.prismaPbxCdr.pbxCdr.upsert({
+                        where: {
+                            cdr_id: data.cdr_id,
+                        },
+                        create: {
+                            ...callData,
+                            cdr_id: data.cdr_id,
+                        },
+                        update: { ...callData },
+                    });
+                }),
+            );
         } catch (e) {
-            this.logger.error(e);
+            this.logger.error(e, SyncPbxCdrSchedule.name);
             return;
         }
     }
 
     private async getCdrQuery(): Promise<string> {
+        const date = this.getStartAndToday();
         const cdr = await this.prismaPbxCdr.pbxCdr.findFirst({
             orderBy: {
                 id: 'desc',
             },
         });
 
-        const date = this.getStartAndToday();
-
         return cdr
-            ? getPbxStatisticsByIdQuery(date.formattedStart, date.formattedEnd, cdr.call_id)
+            ? getPbxStatisticsQuery(date.formattedStart, date.formattedEnd, cdr.call_history_id)
             : getPbxStatisticsQuery(date.formattedStart, date.formattedEnd);
     }
 
@@ -109,26 +109,5 @@ export class SyncPbxCdrSchedule {
             formattedStart: format(startOfToday, 'yyyy-MM-dd HH:mm:ss+00'),
             formattedEnd: format(endOfToday, 'yyyy-MM-dd HH:mm:ss+00'),
         };
-    }
-
-    private aggregatePbxCallStatisticsData(data: PbxCallStatisticsData[]): TransformedPbxCallStatisticsData[] {
-        const aggregatedMap: TransformedPbxCallStatisticsData[] = [];
-
-        const pbx = this.configService.get('pbx');
-        for (const callData of data) {
-            aggregatedMap.push({
-                callId: callData.call_id,
-                answered: callData.answered,
-                destinationCallerId: callData.destination_caller_id,
-                ringingDuration: callData.ringing_duration,
-                sourceCallerId: callData.source_caller_id,
-                startTime: callData.start_time,
-                talkingDuration: callData.talking_duration,
-                recordingUrl: callData.recording_url ? `${pbx.recordingPath}/${callData.recording_url}` : null,
-                segmentId: callData.segment_id,
-            });
-        }
-
-        return aggregatedMap;
     }
 }

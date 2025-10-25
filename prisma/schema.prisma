@@ -10,7 +10,7 @@ generator client {
 
 model PbxCdr {
     id                    Int     @id @default(autoincrement())
-    call_id               Int
+    call_id               Int?
     answered              Boolean
     destination_caller_id String?
     ringing_duration      String?
@@ -18,5 +18,7 @@ model PbxCdr {
     start_time            String?
     talking_duration      String?
     recording_url         String?
-    segment_id            Int     @unique
+    segment_id            Int?     @unique
+    cdr_id                String?  @unique
+    call_history_id       String?  @default("default_value")
 }

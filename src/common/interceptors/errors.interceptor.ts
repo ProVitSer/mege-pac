@@ -21,7 +21,7 @@ export class ErrorsInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler) {
         return next.handle().pipe(
             catchError((err: any) => {
-                this.logger.error(err);
+                this.logger.error(err, ErrorsInterceptor.name);
 
                 const error = every(['table', 'query'], partial(has, err))
                     ? new DatabaseException(err)
